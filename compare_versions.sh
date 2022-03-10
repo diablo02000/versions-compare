@@ -58,7 +58,7 @@ function is_newer(){
 
 	compare ${v1} ${v2}
 
-	if [[ $? == 1 ]];
+	if compare ${v1} ${v2};
 	then
 		return 0
 	else
@@ -86,9 +86,7 @@ function is_equal(){
 	local v1="${1}"
 	local v2="${2}"
 
-	compare ${v1} ${v2}
-
-	if [[ $? == 0 ]];
+	if compare ${v1} ${v2};
 	then
 		return 0
 	else
