@@ -1,51 +1,47 @@
 #!/bin/bash
 
-# Fill small string version length with 0
-# param: ver_1: First version value.
-# param: ver_2: Second version value.
-function __fillVersionLength(){
-    # Keep IFS before variable assignment.
-    # It's use to split version string as array.
-    local IFS="."
-    #shellcheck disable=SC2206
-    local -a L_VERSION1_ARR=(${1})
-    #shellcheck disable=SC2206
-    local -a L_VERSION2_ARR=(${2})
+# Add 0 to the smallest string until both
+# strings have the same length
+function _fillStringLength(){
 
-    # If ver_1 length is smaller than ver_2
-    if [ "${#L_VERSION1_ARR[@]}" -lt "${#L_VERSION2_ARR[@]}" ];
+    # Convert both string in array
+    IFS="." read -ra string1 <<< "${1}"
+    IFS="." read -ra string2 <<< "${2}"
+
+    # If string1 length is smaller than string2
+    if [ "${#string1[@]}" -lt "${#string2[@]}" ];
     then
-        # fill ver_1 with 0
-        for ((i=${#L_VERSION1_ARR[@]}; i < ${#L_VERSION2_ARR[@]}; i++));
+        # fill string1 with 0
+        for ((i=${#string1[@]}; i < ${#string2[@]}; i++));
         do
-            L_VERSION1_ARR["${i}"]=0
+            string1["${i}"]=0
         done
-
-    elif [ "${#L_VERSION1_ARR[@]}" -gt "${#L_VERSION2_ARR[@]}" ];
+    # If string1 length is greater than string2
+    elif [ "${#string1[@]}" -gt "${#string2[@]}" ];
     then
-        # fill ver_1 with 0
-        for ((i=${#L_VERSION2_ARR[@]}; i < ${#L_VERSION1_ARR[@]}; i++));
+        # fill string2 with 0
+        for ((i=${#string2[@]}; i < ${#string1[@]}; i++));
         do
-            L_VERSION2_ARR["${i}"]=0
+            string2["${i}"]=0
         done
     fi
 
-    # Return versions with same length.
-    echo -e "${L_VERSION1_ARR[*]// /.} ${L_VERSION2_ARR[*]// /.}"
+    # Return both string with same length.
+    echo -e "${string1[*]// /.} ${string2[*]// /.}"
 }
 
 # Verify than both version are equals
 # param version1: First version to compare.
 # param version2: Second version to compare.
 function versionsAreEquals(){
-    local L_VERSION1="${1}"
-    local L_VERSION2="${2}"
+    local version1="${1}"
+    local version2="${2}"
 
-    # Fill version string to have same length
-    IFS=" " read -r L_VERSION1 L_VERSION2 <<< "$(__fillVersionLength "${L_VERSION1}" "${L_VERSION2}")"
+    # Update versions format to have same length
+    IFS=" " read -r version1 version2 <<< "$(_fillStringLength "${version1}" "${version2}")"
 
     # Check if versions are equal
-    if [ "${L_VERSION1}" == "${L_VERSION2}" ];
+    if [ "${version1}" == "${version2}" ];
     then
         return 0
     else
@@ -57,22 +53,22 @@ function versionsAreEquals(){
 # param version1: First version to compare.
 # param version2: Second version to compare.
 function versionIsNewer(){
-    local L_VERSION1="${1}"
-    local L_VERSION2="${2}"
+    local version1="${1}"
+    local version2="${2}"
 
-    # Fill version string to have same length
-    IFS=" " read -r L_VERSION1 L_VERSION2 <<< "$(__fillVersionLength "${L_VERSION1}" "${L_VERSION2}")"
+    # Update versions format to have same length
+    IFS=" " read -r version1 version2 <<< "$(_fillStringLength "${version1}" "${version2}")"
 
     # Convert versions string to array
-    IFS="." read -ra L_VERSION1_ARR <<< "${L_VERSION1}"
-    IFS="." read -ra L_VERSION2_ARR <<< "${L_VERSION2}"
+    IFS="." read -ra version1_list <<< "${version1}"
+    IFS="." read -ra version2_list <<< "${version2}"
 
-    for ((i=0; i < ${#L_VERSION1_ARR[@]}; i++));
+    for ((i=0; i < ${#version1_list[@]}; i++));
     do
-        if (( L_VERSION1_ARR[i] > L_VERSION2_ARR[i] ));
+        if (( version1_list[i] > version2_list[i] ));
         then
             return 0
-        elif (( L_VERSION1_ARR[i] < L_VERSION2_ARR[i] ));
+        elif (( version1_list[i] < version2_list[i] ));
         then
             return 1
         fi
@@ -86,22 +82,22 @@ function versionIsNewer(){
 # param version1: First version to compare.
 # param version2: Second version to compare.
 function versionIsOlder(){
-    local L_VERSION1=${1}
-    local L_VERSION2=${2}
+    local version1=${1}
+    local version2=${2}
 
-    # Fill version string to have same length
-    IFS=" " read -r L_VERSION1 L_VERSION2 <<< "$(__fillVersionLength "${L_VERSION1}" "${L_VERSION2}")"
+    # Update versions format to have same length
+    IFS=" " read -r version1 version2 <<< "$(_fillStringLength "${version1}" "${version2}")"
 
     # Convert versions string to array
-    IFS="." read -ra L_VERSION1_ARR <<< "${L_VERSION1}"
-    IFS="." read -ra L_VERSION2_ARR <<< "${L_VERSION2}"
+    IFS="." read -ra version1_list <<< "${version1}"
+    IFS="." read -ra version2_list <<< "${version2}"
 
-    for ((i=0; i < ${#L_VERSION1_ARR[@]}; i++));
+    for ((i=0; i < ${#version1_list[@]}; i++));
     do
-        if (( L_VERSION1_ARR[i] < L_VERSION2_ARR[i] ));
+        if (( version1_list[i] < version2_list[i] ));
         then
             return 0
-        elif (( L_VERSION1_ARR[i] > L_VERSION2_ARR[i] ));
+        elif (( version1_list[i] > version2_list[i] ));
         then
             return 1
         fi
